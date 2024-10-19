@@ -11,7 +11,7 @@ import matplotlib.dates as mdates
 import pandas as pd
 import numpy as np
 
-RESULT_CSV_DIR = 'DIRECTORY HERE'
+RESULT_CSV_DIR = 'DIR_HERE'
 
 class MainUI(QMainWindow):
     # Loads ui on creation
@@ -53,13 +53,14 @@ class Canvas(FigureCanvasQTAgg):
         
         # Plot data for each ID
         for client_id, group in self.grouped_ids:
+            print(group)
             
             # Get data for each ID group
-            x = group['Time']
+            self.ax.index = group['Time']
             y = group[data_type]
             
             # Plot data for each ID
-            self.ax.plot(x, y, label=f"ID {client_id}", marker='o')
+            self.ax.plot(y, label=f"ID {client_id}", marker='o')
             
         
         # Customize the plot
