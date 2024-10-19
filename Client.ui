@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QFrame" name="tempFrame">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>70</y>
+      <width>1100</width>
+      <height>600</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QWidget" name="plotCanvas" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>1100</width>
+       <height>550</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="plotToolbar" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>550</y>
+       <width>1100</width>
+       <height>50</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="tempButton">
+    <property name="geometry">
+     <rect>
+      <x>455</x>
+      <y>10</y>
+      <width>180</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show Temperature Graph</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="humidityButton">
+    <property name="geometry">
+     <rect>
+      <x>645</x>
+      <y>10</y>
+      <width>180</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Show Humidity Graph</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
