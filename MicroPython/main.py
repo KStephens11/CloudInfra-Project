@@ -7,6 +7,36 @@ import time
 import dht
 import ntptime
 
+##### Configuration #####
+
+# Client ID
+CLIENT_ID = 0
+
+# Sensor type, 0 = random, 1 = DHT
+SENSOR_TYPE = 0
+
+# DHT SENSOR PIN, 16 = D0
+DHT_SENSOR_PIN = 16
+
+# WIFI SSID and Password
+ssid = 'SSID'
+password = 'PASS'
+
+# AWS info for connection
+CLIENT_NAME = f"esp-python-{CLIENT_ID}"
+AWS_ENDPOINT = "ENDPOINT"
+
+# Directory for private key and certificate
+PRIVATE_KEY_DIR = "cert/private.key"
+CERTIFICATE_DIR = "cert/certificate.crt"
+
+# MQTT topics
+PUB_TOPIC = f"esp-python-{CLIENT_ID}/pub"
+SUB_TOPIC = f"esp-python-{CLIENT_ID}/sub"
+
+
+##### Script #####
+
 class Client:
     def __init__(self, client_id, sensor_type):
         self.client_id = client_id
@@ -14,26 +44,45 @@ class Client:
         self.humidity = None
         self.type = sensor_type
         
+        if self.type == 0:
+            self.temperature = randrange(12,28)
+            self.humidity = randrange(40,60)
+
         if self.type == 1:
-            # 16 = Pin D0 on board
-            self.dht_pin = Pin(16, Pin.IN)
+            self.dht_pin = Pin(DHT_SENSOR_PIN, Pin.IN)
             self.dht_sensor = dht.DHT11(self.dht_pin)
             
         
     def get_data(self):
         if self.type == 0:
-            result = str(self.client_id) + ',' + str(randrange(10,30)) + ',' + str(randrange(30,60))
+            if self.temperature > 32:
+                self.temperature +=  randrange(-2,0)
+            elif self.temperature < 8:
+                self.temperature +=  randrange(0,2)
+            else:
+                self.temperature +=  randrange(-2,2)
+
+            if self.humidity > 65:
+                self.humidity +=  randrange(-2,0)
+            elif self.humidity < 35:
+                self.humidity +=  randrange(0,2)
+            else:
+                self.humidity += randrange(-2,2)
+
         elif self.type == 1:
             try:
                 self.dht_sensor.measure()
-                result = str(self.client_id) + ',' + str(self.dht_sensor.temperature()) + ',' + str(self.dht_sensor.humidity())
+                self.temperature = self.dht_sensor.temperature()
+                self.humidity = self.dht_sensor.humidity()
             except:
-                result = str(self.client_id) + ',' + '0'+ ',' + '0'
+                self.temperature = 0
+                self.humidity = 0
         else:
             result = "ERROR: INVALID SENSOR TYPE"
         
+        result = str(self.client_id) + ',' + str(self.temperature) + ',' + str(self.humidity)
         return result
-
+                
 def randrange(start, stop=None):
     if stop is None:
         stop = start
@@ -67,26 +116,11 @@ def read_cert(filename):
 def mqtt_subscribe_callback(topic, msg):
     print(f"Received topic: {topic} message: {msg}")
 
-CLIENT_ID = 0
 
-# MQTT topics
-PUB_TOPIC = f"TOPIC-{CLIENT_ID}/pub"
-SUB_TOPIC = f"TOPIC-{CLIENT_ID}/sub"
 
-# AWS info for connection
-CLIENT_NAME = f"CLIENT_NAME-{CLIENT_ID}"
-AWS_ENDPOINT = "ENDPOINT HERE"
 
-# Connect to the Wi-Fi network
-ssid = 'SSID'
-password = 'PASSWORD'
-
-# Private Key and Certificate, uses read_cert function to convert to binary
-PRIVATE_KEY = read_cert("cert/private.key")
-CERTIFICATE = read_cert("cert/certificate.crt")
-
-# Create sensor object, 1st arg ID, 2nd type (0=random,1=DHT)
-sensor = Client(CLIENT_ID,0)
+# Create sensor object
+sensor = Client(CLIENT_ID,SENSOR_TYPE)
 
 # Set up WIFI in station mode
 station = network.WLAN(network.STA_IF)
@@ -109,6 +143,10 @@ while True:
         print('Connected to WIFI')
         print('Network config:', station.ifconfig())
         break
+
+# Private Key and Certificate, uses read_cert function to convert to binary
+PRIVATE_KEY = read_cert(PRIVATE_KEY_DIR)
+CERTIFICATE = read_cert(CERTIFICATE_DIR)
 
 # Sync Time
 try:
@@ -136,15 +174,13 @@ mqttc.subscribe(SUB_TOPIC)
 
 current_time = None
 
-
-
 while True:
 
     # Get Current time
     current_time = time.localtime()
 
     # Format date
-    date = f"{current_time[2]}/{current_time[1]}/{current_time[0]} {current_time[3]+1}:{current_time[4]}:{current_time[5]}"
+    date = f"{current_time[2]}/{current_time[1]}/{current_time[0]} {current_time[3]}:{current_time[4]}:{current_time[5]}"
 
     message = date + ',' + sensor.get_data()
 
